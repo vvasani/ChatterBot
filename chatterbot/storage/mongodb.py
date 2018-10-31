@@ -79,6 +79,7 @@ class MongoDatabaseAdapter(StorageAdapter):
         tags = kwargs.pop('tags', [])
         exclude_text = kwargs.pop('exclude_text', None)
         persona_not_startswith = kwargs.pop('persona_not_startswith', None)
+        search_text_contains = kwargs.pop('search_text_contains', None)
 
         if tags:
             kwargs['tags'] = {
@@ -104,6 +105,12 @@ class MongoDatabaseAdapter(StorageAdapter):
                     '$eq': persona
                 }
             kwargs['persona']['$not'] = re.compile('^bot:*')
+
+        if search_text_contains:
+            or_regex = '|'.join([
+                '${}$'.format(word) for word in search_text_contains.split(' ')
+            ])
+            kwargs['search_text'] = re.compile(or_regex)
 
         mongo_ordering = []
 

@@ -115,6 +115,7 @@ class SQLStorageAdapter(StorageAdapter):
         tags = kwargs.pop('tags', [])
         exclude_text = kwargs.pop('exclude_text', None)
         persona_not_startswith = kwargs.pop('persona_not_startswith', None)
+        search_text_contains = kwargs.pop('search_text_contains', None)
 
         # Convert a single sting into a list if only one tag is provided
         if type(tags) == str:
@@ -138,6 +139,15 @@ class SQLStorageAdapter(StorageAdapter):
         if persona_not_startswith:
             statements = statements.filter(
                 ~Statement.persona.startswith('bot:')
+            )
+
+        if search_text_contains:
+            or_query = [
+                Statement.search_text.contains(word) for word in search_text_contains.split(' ')
+            ]
+
+            statements = statements.filter(
+                *or_query
             )
 
         if order_by:
